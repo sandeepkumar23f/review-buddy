@@ -5,7 +5,7 @@ export default function Home() {
   const [code, setCode] = useState("");
   const [review, setReview] = useState("");
   const [loading, setLoading] = useState(false);
-  const API_URL = process.env.NEXT_API_URL;
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const handleReview = async () => {
     if (!code.trim()) {
       alert("Enter your Code first");
