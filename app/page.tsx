@@ -5,7 +5,7 @@ export default function Home() {
   const [code, setCode] = useState("");
   const [review, setReview] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const API_URL = process.env.NEXT_API_URL;
   const handleReview = async () => {
     if (!code.trim()) {
       alert("Enter your Code first");
@@ -16,7 +16,7 @@ export default function Home() {
     setReview("");
 
     try {
-      const res = await fetch("http://localhost:3000/ai/review", {
+      const res = await fetch(`${API_URL}/ai/review`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -47,7 +47,7 @@ export default function Home() {
         </h1>
 
         <textarea
-          placeholder="Paste your code here..."
+          placeholder="Enter your code here..."
           value={code}
           onChange={(e) => setCode(e.target.value)}
           className="w-full h-72 bg-[#111] border border-gray-700 rounded-xl p-4 text-sm outline-none focus:border-green-400"
