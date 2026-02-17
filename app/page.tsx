@@ -1,14 +1,22 @@
 "use client";
+
 import { useState } from "react";
+import dynamic from "next/dynamic";
+
+const Editor = dynamic(() => import("@monaco-editor/react"), {
+  ssr: false,
+});
 
 export default function Home() {
-  const [code, setCode] = useState("");
-  const [review, setReview] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [code, setCode] = useState<string>("// Write your code here");
+  const [review, setReview] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
   const handleReview = async () => {
     if (!code.trim()) {
-      alert("Enter your Code first");
+      alert("Enter code first");
       return;
     }
 
@@ -19,19 +27,17 @@ export default function Home() {
       const res = await fetch(`${API_URL}/ai/review`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ code })
+        body: JSON.stringify({ code }),
       });
 
       const data = await res.json();
 
-      if (data.success) {
-        setReview(data.review);
-      } else {
-        setReview("AI failed to review code");
-      }
-    } catch (err) {
+      if (data.success) setReview(data.review);
+      else setReview("AI failed to review");
+
+    } catch (error) {
       setReview("Server error");
     }
 
@@ -40,30 +46,42 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-      <div className="w-full max-w-5xl">
+      <div className="w-full max-w-6xl">
 
-        <h1 className="text-4xl font-bold text-center mb-6">
-          ReviewBuddy
+        <h1 className="text-4xl font-bold text-center mb-6 text-green-400">
+          ReviewBuddy AI
         </h1>
 
-        <textarea
-          placeholder="Enter your code here..."
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          className="w-full h-72 bg-[#111] border border-gray-700 rounded-xl p-4 text-sm outline-none focus:border-green-400"
-        />
 
+        <div className="border border-gray-700 rounded-xl overflow-hidden">
+          <Editor
+            height="420px"
+            theme="vs-dark"
+            value={code}
+            onChange={(value) => setCode(value || "")}
+            options={{
+              fontSize: 14,
+              minimap: { enabled: false },
+              wordWrap: "on",
+              scrollBeyondLastLine: false,
+              automaticLayout: true,
+            }}
+          />
+        </div>
+
+        {/* Button */}
         <button
           onClick={handleReview}
-          className="mt-4 w-full bg-green-500 hover:bg-green-600 transition-all py-3 rounded-xl font-semibold text-black"
+          className="mt-4 w-full bg-green-500 hover:bg-green-600 py-3 rounded-xl font-semibold text-black"
         >
           {loading ? "Reviewing..." : "Review Code"}
         </button>
 
+        {/* Output */}
         {review && (
           <div className="mt-8 bg-[#0d0d0d] border border-gray-800 rounded-xl p-6">
             <h2 className="text-xl font-semibold mb-3 text-green-400">
-              ReviewBuddy Result
+              AI Review Result
             </h2>
 
             <pre className="whitespace-pre-wrap text-sm text-gray-300">
@@ -71,7 +89,6 @@ export default function Home() {
             </pre>
           </div>
         )}
-
       </div>
     </div>
   );
